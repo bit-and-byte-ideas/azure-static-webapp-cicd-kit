@@ -15,7 +15,7 @@ Consumer Repo
 
 | Path | Purpose |
 |---|---|
-| `modules/azure-static-webapp/` | OpenTofu module — provisions resource group, Static Web App, and optional resources |
+| `modules/azure-static-webapp/` | OpenTofu module — references an existing resource group, provisions Static Web App and optional resources |
 | `.github/workflows/opentofu.yml` | Reusable GitHub Actions workflow — validate → plan → (approval) → apply |
 | `examples/basic/` | Minimal working example showing module usage |
 
@@ -70,6 +70,8 @@ az storage container create \
 
 ## Module Usage
 
+> **Prerequisite:** The resource group referenced by `resource_group_name` must already exist. The module reads it via a data source and does not create or manage it.
+
 ```hcl
 # infra/main.tf
 provider "azurerm" {
@@ -79,8 +81,7 @@ provider "azurerm" {
 module "static_webapp" {
   source = "github.com/bit-and-byte-ideas/azure-static-webapp-cicd-kit//modules/azure-static-webapp"
 
-  resource_group_name = "my-app-rg"
-  location            = "East US"
+  resource_group_name = "my-app-rg"   # must already exist
   static_webapp_name  = "my-app"
 
   # Optional features
