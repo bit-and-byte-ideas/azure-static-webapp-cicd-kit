@@ -9,11 +9,6 @@ output "api_key" {
   sensitive   = true
 }
 
-output "resource_group_name" {
-  description = "Name of the provisioned resource group."
-  value       = azurerm_resource_group.this.name
-}
-
 output "static_webapp_id" {
   description = "Resource ID of the Azure Static Web App."
   value       = azurerm_static_web_app.this.id
