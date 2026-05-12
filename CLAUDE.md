@@ -25,7 +25,7 @@ examples/basic/                Minimal consumer example (main.tf, backend.tf, va
 
 ## Module: `modules/azure-static-webapp`
 
-Always-created resources: `azurerm_resource_group`, `azurerm_static_web_app`
+Always-created resources: `azurerm_static_web_app` — the resource group is **not** managed by this module; it is read via `data "azurerm_resource_group"` and must exist before apply
 
 Conditional resources:
 - `enable_managed_identity = true` → `identity { type = "SystemAssigned" }` block on the Static Web App — **requires `sku_tier = "Standard"`**; enforced by a `validation` block that errors at plan time if Free tier is used with this flag
@@ -55,7 +55,6 @@ tofu init \
 # Plan with variable values
 tofu plan \
   -var="resource_group_name=my-rg" \
-  -var="location=East US" \
   -var="static_webapp_name=my-app"
 
 # Check formatting
