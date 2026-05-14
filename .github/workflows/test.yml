@@ -1,0 +1,73 @@
+name: Test
+
+on:
+  push:
+    branches-ignore: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel any in-progress run for the same branch when a new push arrives.
+# github.event.pull_request.head.ref is the branch name for pull_request events;
+# github.ref_name is the branch name for push events — both resolve to the same
+# value so push and pull_request runs on the same branch share one concurrency slot.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Layer A — Static analysis: module linting, workflow linting, IaC security
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6.2.2
+        with:
+          tflint_version: latest
+
+      - name: TFLint init
+        run: tflint --init
+
+      - name: TFLint
+        run: tflint --recursive
+
+      - name: Lint GitHub Actions workflows
+        uses: docker://rhysd/actionlint:1.7.12
+        with:
+          args: -color
+
+      - name: Trivy IaC scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: modules/
+          exit-code: "1"
+          severity: HIGH,CRITICAL
+
+  # ---------------------------------------------------------------------------
+  # Layer B — OpenTofu unit tests (no Azure credentials required)
+  # ---------------------------------------------------------------------------
+  unit-test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+
+      - name: Init (no backend)
+        working-directory: modules/azure-static-webapp
+        run: tofu init -backend=false
+
+      - name: Run unit tests
+        working-directory: modules/azure-static-webapp
+        run: tofu test
