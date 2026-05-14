@@ -1,10 +1,17 @@
 mock_provider "azurerm" {
-  # azurerm_application_insights.workspace_id is validated against the full
-  # Azure resource ID format at plan time. Override the mock id so the
-  # cross-resource reference resolves to a valid-looking ID.
+  # The azurerm provider validates cross-resource Azure resource ID references
+  # at plan time. Any mock id that is referenced by another resource must be
+  # a properly formatted Azure resource ID, otherwise the plan will fail with
+  # a parsing error before assertions can run.
   mock_resource "azurerm_log_analytics_workspace" {
     defaults = {
       id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.OperationalInsights/workspaces/test-app-laws"
+    }
+  }
+
+  mock_resource "azurerm_static_web_app" {
+    defaults = {
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Web/staticSites/test-app"
     }
   }
 }

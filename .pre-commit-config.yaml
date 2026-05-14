@@ -61,3 +61,23 @@ repos:
         language: system
         pass_filenames: false
         files: \.(tf|tftest\.hcl)$
+
+  # ---------------------------------------------------------------------------
+  # tofu test — OpenTofu unit tests (no Azure credentials required)
+  # CI equivalent: unit-test job in test.yml
+  # Requires OpenTofu installed locally (brew install opentofu).
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: tofu-test
+        name: OpenTofu unit tests
+        entry: bash
+        args:
+          - -c
+          - >-
+            tofu -chdir=modules/azure-static-webapp init -backend=false &&
+            tofu -chdir=modules/azure-static-webapp test
+        language: system
+        pass_filenames: false
+        files: \.(tf|tftest\.hcl)$
+        require_serial: true
