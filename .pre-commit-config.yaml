@@ -1,0 +1,63 @@
+# Pre-commit hooks that run the same checks as the CI lint job.
+# See .github/workflows/test.yml (lint job) for the canonical CI definitions.
+#
+# Setup:
+#   pip install pre-commit
+#   pre-commit install
+#
+# All linters run via Docker — no local tool installs needed beyond Docker itself.
+# tflint plugins are cached in ~/.tflint.d on the host and reused across runs.
+
+repos:
+  # ---------------------------------------------------------------------------
+  # actionlint — GitHub Actions workflow linter
+  # CI equivalent: docker://rhysd/actionlint:1.7.12
+  # pre-commit installs actionlint automatically via Go; no manual install needed.
+  # ---------------------------------------------------------------------------
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  # ---------------------------------------------------------------------------
+  # tflint — OpenTofu/Terraform module linter (runs via Docker, no local install)
+  # CI equivalent: tflint --init && tflint --recursive
+  # Plugins are downloaded on first run and cached in ~/.tflint.d for reuse.
+  # Requires Docker running locally.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: tflint
+        name: TFLint
+        entry: bash
+        args:
+          - -c
+          - >-
+            docker run --rm -v "${PWD}:/data" -v "${HOME}/.tflint.d:/root/.tflint.d"
+            ghcr.io/terraform-linters/tflint:v0.62.1 --init &&
+            docker run --rm -v "${PWD}:/data" -v "${HOME}/.tflint.d:/root/.tflint.d"
+            ghcr.io/terraform-linters/tflint:v0.62.1 --recursive
+        language: system
+        pass_filenames: false
+        files: \.(tf|tftest\.hcl)$
+        require_serial: true
+
+  # ---------------------------------------------------------------------------
+  # trivy — IaC security scanner (runs via Docker, no local install)
+  # CI equivalent: trivy config --severity HIGH,CRITICAL --exit-code 1 modules/
+  # Requires Docker running locally.
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: trivy-iac
+        name: Trivy IaC scan
+        entry: bash
+        args:
+          - -c
+          - >-
+            docker run --rm -v "${PWD}:/src"
+            aquasecurity/trivy:0.70.0
+            config --severity HIGH,CRITICAL --exit-code 1 /src/modules/
+        language: system
+        pass_filenames: false
+        files: \.(tf|tftest\.hcl)$
