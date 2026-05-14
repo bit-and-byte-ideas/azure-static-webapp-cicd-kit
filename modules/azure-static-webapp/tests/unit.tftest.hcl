@@ -1,4 +1,13 @@
-mock_provider "azurerm" {}
+mock_provider "azurerm" {
+  # azurerm_application_insights.workspace_id is validated against the full
+  # Azure resource ID format at plan time. Override the mock id so the
+  # cross-resource reference resolves to a valid-looking ID.
+  mock_resource "azurerm_log_analytics_workspace" {
+    defaults = {
+      id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.OperationalInsights/workspaces/test-app-laws"
+    }
+  }
+}
 
 # Shared variables used across most tests.
 variables {

@@ -6,6 +6,14 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel any in-progress run for the same branch when a new push arrives.
+# github.event.pull_request.head.ref is the branch name for pull_request events;
+# github.ref_name is the branch name for push events — both resolve to the same
+# value so push and pull_request runs on the same branch share one concurrency slot.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   # ---------------------------------------------------------------------------
   # Layer A — Static analysis: module linting, workflow linting, IaC security
