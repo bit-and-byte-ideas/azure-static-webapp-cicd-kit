@@ -56,6 +56,10 @@ jobs:
         with:
           tofu_version: latest
 
+      - name: Init (no backend)
+        working-directory: modules/azure-static-webapp
+        run: tofu init -backend=false
+
       - name: Run unit tests
         working-directory: modules/azure-static-webapp
         run: tofu test

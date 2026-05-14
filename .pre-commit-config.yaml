@@ -56,7 +56,7 @@ repos:
           - -c
           - >-
             docker run --rm -v "${PWD}:/src"
-            aquasecurity/trivy:0.70.0
+            ghcr.io/aquasecurity/trivy:0.70.0
             config --severity HIGH,CRITICAL --exit-code 1 /src/modules/
         language: system
         pass_filenames: false

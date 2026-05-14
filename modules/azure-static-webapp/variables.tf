@@ -3,11 +3,6 @@ variable "resource_group_name" {
   description = "Name of the Azure resource group to create."
 }
 
-variable "location" {
-  type        = string
-  description = "Azure region where resources will be deployed (e.g. \"East US\")."
-}
-
 variable "static_webapp_name" {
   type        = string
   description = "Name of the Azure Static Web App."

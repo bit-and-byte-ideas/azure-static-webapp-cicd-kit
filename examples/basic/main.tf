@@ -6,7 +6,6 @@ module "static_webapp" {
   source = "../../modules/azure-static-webapp"
 
   resource_group_name = var.resource_group_name
-  location            = var.location
   static_webapp_name  = var.static_webapp_name
 
   # Optional features — uncomment to enable

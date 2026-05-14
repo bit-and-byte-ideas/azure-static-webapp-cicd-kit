@@ -3,7 +3,6 @@ mock_provider "azurerm" {}
 # Shared variables used across most tests.
 variables {
   resource_group_name = "test-rg"
-  location            = "eastus"
   static_webapp_name  = "test-app"
 }
 
