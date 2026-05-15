@@ -16,6 +16,13 @@ resource "azurerm_static_web_app" "this" {
       type = "SystemAssigned"
     }
   }
+
+  lifecycle {
+    # repository_branch and repository_url are written by the Azure SWA GitHub
+    # Actions deployment workflow, not by this module. Ignoring them prevents a
+    # perma-diff where every plan proposes clearing them back to null.
+    ignore_changes = [repository_branch, repository_url]
+  }
 }
 
 # --- Optional: Application Insights ---
