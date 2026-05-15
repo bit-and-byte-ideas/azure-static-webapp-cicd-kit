@@ -95,6 +95,10 @@ jobs:
         uses: opentofu/setup-opentofu@v1
         with:
           tofu_version: ${{ inputs.tofu_version }}
+          # Disable the wrapper: it normalizes exit codes and swallows exit code 2
+          # returned by `tofu plan -detailed-exitcode`, causing apply to be skipped
+          # even when changes are present.
+          tofu_wrapper: false
 
       - name: Login to Azure (OIDC)
         uses: azure/login@v2
